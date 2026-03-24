@@ -1,184 +1,573 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POS Dot Art Creator - Login</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: #f0f2f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-        
-        /* Login Card Style */
-        .login-container { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
-        .login-container h2 { color: #333; margin-bottom: 10px; font-size: 24px; }
-        .login-container p { color: #666; margin-bottom: 30px; font-size: 14px; }
-        
-        .input-group { position: relative; margin-bottom: 20px; text-align: left; }
-        .input-group i { position: absolute; left: 15px; top: 38px; color: #007aff; }
-        .input-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #444; font-size: 13px; }
-        .input-group input { width: 100%; padding: 12px 15px 12px 40px; border: 1.5px solid #ddd; border-radius: 10px; outline: none; transition: 0.3s; }
-        .input-group input:focus { border-color: #007aff; box-shadow: 0 0 8px rgba(0,122,255,0.2); }
-        
-        .login-btn { background: #007aff; color: white; border: none; padding: 14px; width: 100%; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
-        .login-btn:hover { background: #0056b3; }
-        
-        /* Main App Style */
-        #app-section { display: none; width: 100%; max-width: 500px; padding: 20px; }
-        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
-        canvas { width: 100%; border: 1px solid #eee; border-radius: 8px; margin-top: 15px; background: white; }
-        .control-group { margin: 15px 0; text-align: left; background: #f9f9f9; padding: 15px; border-radius: 12px; }
-        label { font-size: 13px; font-weight: bold; color: #666; display: block; margin-bottom: 8px; }
-        input[type="range"] { width: 100%; accent-color: #007aff; cursor: pointer; }
-        .download-btn { background: #28a745; color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-size: 16px; font-weight: bold; margin-top: 20px; cursor: pointer; }
-        
-        .error-msg { color: #dc3545; font-size: 13px; margin-top: 10px; display: none; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DotPress · Art Creator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #0e0e0e;
+      --paper: #f5f0e8;
+      --cream: #ede8dd;
+      --accent: #c8402a;
+      --accent-dark: #9e2f1e;
+      --muted: #8a8070;
+      --rule: #d4cebf;
+      --dot-preview: #2a2420;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--paper);
+      min-height: 100vh;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--ink);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1000;
+      opacity: 0.5;
+    }
+
+    #login-section {
+      position: fixed; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 100;
+      background: var(--paper);
+      animation: fadeIn 0.5s ease;
+    }
+
+    .login-wrap {
+      width: 100%; max-width: 380px;
+      padding: 20px;
+    }
+
+    .login-masthead { margin-bottom: 48px; }
+
+    .login-masthead .eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .login-masthead h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 52px;
+      font-weight: 900;
+      line-height: 0.95;
+      color: var(--ink);
+    }
+
+    .login-masthead h1 span { color: var(--accent); }
+
+    .login-masthead .tagline {
+      margin-top: 14px;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 300;
+      letter-spacing: 0.02em;
+    }
+
+    .dot-deco { display: flex; gap: 5px; margin: 24px 0; }
+    .dot-deco span { width: 6px; height: 6px; border-radius: 50%; background: var(--ink); display: block; }
+    .dot-deco span:nth-child(2) { opacity: 0.4; }
+    .dot-deco span:nth-child(3) { opacity: 0.15; }
+
+    .field { margin-bottom: 20px; }
+
+    .field label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .field input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1.5px solid var(--rule);
+      padding: 10px 0;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.25s;
+    }
+
+    .field input:focus { border-bottom-color: var(--ink); }
+    .field input::placeholder { color: var(--rule); }
+
+    .login-btn {
+      margin-top: 36px;
+      width: 100%;
+      background: var(--ink);
+      color: var(--paper);
+      border: none;
+      padding: 16px 24px;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      border-radius: 2px;
+    }
+
+    .login-btn:hover { background: var(--accent); }
+    .login-btn:active { transform: scale(0.99); }
+
+    .error-msg {
+      font-size: 12px;
+      color: var(--accent);
+      font-family: 'DM Mono', monospace;
+      margin-top: 12px;
+      display: none;
+      letter-spacing: 0.05em;
+    }
+
+    #app-section {
+      display: none;
+      min-height: 100vh;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .app-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 32px;
+      border-bottom: 1px solid var(--rule);
+      position: sticky; top: 0;
+      background: var(--paper);
+      z-index: 50;
+    }
+
+    .app-header .brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .app-header .brand span { color: var(--accent); }
+
+    .logout-btn {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: none;
+      border: 1px solid var(--rule);
+      padding: 8px 14px;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: all 0.2s;
+    }
+
+    .logout-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .app-body {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      min-height: calc(100vh - 65px);
+    }
+
+    .sidebar {
+      border-right: 1px solid var(--rule);
+      padding: 32px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .sidebar-section-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .upload-zone {
+      border: 1.5px dashed var(--rule);
+      border-radius: 4px;
+      padding: 32px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      background: var(--cream);
+    }
+
+    .upload-zone:hover { border-color: var(--ink); background: #ede8dd; }
+    .upload-zone.has-image { border-style: solid; border-color: var(--ink); }
+
+    .upload-zone input[type="file"] {
+      position: absolute; inset: 0;
+      opacity: 0; cursor: pointer;
+      width: 100%; height: 100%;
+    }
+
+    .upload-icon { font-size: 28px; margin-bottom: 10px; color: var(--muted); }
+
+    .upload-zone p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+    .upload-zone .upload-hint {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: var(--accent);
+      margin-top: 6px;
+    }
+
+    .control-block { display: flex; flex-direction: column; gap: 24px; }
+
+    .control-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 10px;
+    }
+
+    .control-name {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: var(--ink);
+    }
+
+    .control-val {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 2px;
+      background: var(--rule);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--ink);
+      border: 2px solid var(--paper);
+      box-shadow: 0 0 0 1.5px var(--ink);
+      transition: background 0.2s, transform 0.15s;
+    }
+
+    input[type="range"]:hover::-webkit-slider-thumb {
+      background: var(--accent);
+      box-shadow: 0 0 0 1.5px var(--accent);
+      transform: scale(1.2);
+    }
+
+    .dl-btn {
+      margin-top: auto;
+      width: 100%;
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 16px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: background 0.2s, transform 0.1s;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+
+    .dl-btn:hover { background: var(--accent-dark); }
+    .dl-btn:active { transform: scale(0.99); }
+    .dl-btn:disabled { background: var(--rule); color: var(--muted); cursor: not-allowed; }
+
+    .canvas-area {
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      background: var(--cream);
+      position: relative;
+    }
+
+    .canvas-area::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: radial-gradient(circle, var(--rule) 1px, transparent 1px);
+      background-size: 24px 24px;
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .canvas-wrap { position: relative; z-index: 1; width: 100%; max-width: 576px; }
+
+    .canvas-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    canvas {
+      width: 100%;
+      border: 1px solid var(--rule);
+      display: block;
+      background: white;
+      box-shadow: 0 8px 40px rgba(14,14,14,0.08);
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 360px;
+      border: 1.5px dashed var(--rule);
+      background: white;
+      color: var(--muted);
+      gap: 16px;
+    }
+
+    .big-dot { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+    .big-dot span { width: 8px; height: 8px; background: var(--rule); border-radius: 50%; display: block; }
+    .big-dot span:nth-child(3), .big-dot span:nth-child(7),
+    .big-dot span:nth-child(9), .big-dot span:nth-child(11),
+    .big-dot span:nth-child(13), .big-dot span:nth-child(17),
+    .big-dot span:nth-child(23) { background: var(--muted); }
+
+    .empty-state p { font-size: 13px; font-weight: 300; }
+
+    @media (max-width: 768px) {
+      .app-body { grid-template-columns: 1fr; }
+      .sidebar { border-right: none; border-bottom: 1px solid var(--rule); }
+      .canvas-area { padding: 24px; }
+      .app-header { padding: 16px 20px; }
+    }
+  </style>
 </head>
 <body>
 
-<div class="login-container" id="login-section">
-    <i class="fas fa-print" style="font-size: 50px; color: #007aff; margin-bottom: 15px;"></i>
-    <h2>POS Dot Art</h2>
-    <p>Please login to your account</p>
-    
-    <div class="input-group">
-        <label>Username</label>
-        <i class="fas fa-user"></i>
-        <input type="text" id="username" placeholder="Enter Username">
+<div id="login-section">
+  <div class="login-wrap">
+    <div class="login-masthead">
+      <p class="eyebrow">Thermal · Receipt · Studio</p>
+      <h1>Dot<span>Press</span></h1>
+      <p class="tagline">Transform photographs into dot-matrix art, ready for your POS printer.</p>
     </div>
-    
-    <div class="input-group">
-        <label>Password</label>
-        <i class="fas fa-lock"></i>
-        <input type="password" id="password" placeholder="Enter Password">
+    <div class="dot-deco">
+      <span></span><span></span><span></span>
     </div>
-    
-    <button class="login-btn" onclick="checkLogin()">LOGIN</button>
-    <p id="error" class="error-msg">Invalid credentials! Please try again.</p>
+    <div class="field">
+      <label>Username</label>
+      <input type="text" id="username" placeholder="Enter username" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="········">
+    </div>
+    <button class="login-btn" onclick="checkLogin()">Enter Studio →</button>
+    <p id="error" class="error-msg">✕ &nbsp;Invalid credentials. Please try again.</p>
+  </div>
 </div>
 
 <div id="app-section">
-    <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h3 style="margin: 0; color: #333;">Art Creator</h3>
-            <button onclick="logout()" style="background: none; border: none; color: #ff3b30; cursor: pointer; font-weight: bold;">Logout</button>
+  <header class="app-header">
+    <div class="brand">Dot<span>Press</span></div>
+    <button class="logout-btn" onclick="logout()">Sign Out</button>
+  </header>
+  <div class="app-body">
+    <aside class="sidebar">
+      <div>
+        <p class="sidebar-section-title">01 — Source Image</p>
+        <div class="upload-zone" id="uploadZone">
+          <input type="file" id="upload" accept="image/*">
+          <div class="upload-icon">⊕</div>
+          <p>Drop an image here<br>or click to browse</p>
+          <p class="upload-hint">PNG, JPG, WEBP</p>
         </div>
-        <hr style="border: 0.5px solid #eee; margin: 15px 0;">
-        
-        <input type="file" id="upload" accept="image/*" style="margin-bottom: 15px;">
-        
-        <div class="control-group">
-            <label id="dotLabel"><i class="fas fa-braille"></i> Dot Size: 4</label>
+      </div>
+      <div>
+        <p class="sidebar-section-title">02 — Rendering</p>
+        <div class="control-block">
+          <div class="control-item">
+            <div class="control-header">
+              <span class="control-name">Dot Size</span>
+              <span class="control-val" id="dotVal">4</span>
+            </div>
             <input type="range" id="dotSlider" min="1" max="15" value="4">
-        </div>
-
-        <div class="control-group">
-            <label><i class="fas fa-adjust"></i> Brightness:</label>
+          </div>
+          <div class="control-item">
+            <div class="control-header">
+              <span class="control-name">Brightness</span>
+              <span class="control-val" id="contrastVal">1.2</span>
+            </div>
             <input type="range" id="contrastSlider" min="0.5" max="2.5" step="0.1" value="1.2">
+          </div>
         </div>
-
-        <canvas id="canvas"></canvas>
-        <button class="download-btn" id="saveBtn"><i class="fas fa-download"></i> DOWNLOAD TO PHOTOS</button>
-    </div>
+      </div>
+      <button class="dl-btn" id="saveBtn" disabled>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 1v8M4 6l3 3 3-3M2 11h10" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Download Print File
+      </button>
+    </aside>
+    <main class="canvas-area">
+      <div class="canvas-wrap">
+        <p class="canvas-label">Preview — 576px print width</p>
+        <div id="emptyState" class="empty-state">
+          <div class="big-dot">
+            <span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+          <p>Upload an image to begin</p>
+        </div>
+        <canvas id="canvas" style="display:none;"></canvas>
+      </div>
+    </main>
+  </div>
 </div>
 
 <script>
-    const VALID_USER = "admin";
-    const VALID_PASS = "1234";
+  const VALID_USER = "admin";
+  const VALID_PASS = "1234";
 
-    function checkLogin() {
-        const u = document.getElementById('username').value;
-        const p = document.getElementById('password').value;
-        const error = document.getElementById('error');
-
-        if(u === VALID_USER && p === VALID_PASS) {
-            document.getElementById('login-section').style.display = 'none';
-            document.getElementById('app-section').style.display = 'block';
-        } else {
-            error.style.display = 'block';
-        }
+  function checkLogin() {
+    const u = document.getElementById('username').value;
+    const p = document.getElementById('password').value;
+    if (u === VALID_USER && p === VALID_PASS) {
+      document.getElementById('login-section').style.display = 'none';
+      document.getElementById('app-section').style.display = 'block';
+    } else {
+      document.getElementById('error').style.display = 'block';
     }
+  }
 
-    function logout() {
-        location.reload();
-    }
+  document.getElementById('password').addEventListener('keydown', e => {
+    if (e.key === 'Enter') checkLogin();
+  });
 
-    const upload = document.getElementById('upload');
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    const dotSlider = document.getElementById('dotSlider');
-    const contrastSlider = document.getElementById('contrastSlider');
-    const dotLabel = document.getElementById('dotLabel');
-    const saveBtn = document.getElementById('saveBtn');
+  function logout() { location.reload(); }
 
-    let img = new Image();
+  const upload = document.getElementById('upload');
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  const dotSlider = document.getElementById('dotSlider');
+  const contrastSlider = document.getElementById('contrastSlider');
+  const dotVal = document.getElementById('dotVal');
+  const contrastVal = document.getElementById('contrastVal');
+  const saveBtn = document.getElementById('saveBtn');
+  const uploadZone = document.getElementById('uploadZone');
+  const emptyState = document.getElementById('emptyState');
 
-    upload.onchange = (e) => {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            img.onload = render;
-            img.src = event.target.result;
-        };
-        reader.readAsDataURL(e.target.files[0]);
+  let img = new Image();
+
+  upload.onchange = (e) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      img.onload = () => {
+        uploadZone.classList.add('has-image');
+        uploadZone.querySelector('p:not(.upload-hint)').textContent = 'Image loaded ✓';
+        emptyState.style.display = 'none';
+        canvas.style.display = 'block';
+        saveBtn.disabled = false;
+        render();
+      };
+      img.src = event.target.result;
     };
+    reader.readAsDataURL(e.target.files[0]);
+  };
 
-    [dotSlider, contrastSlider].forEach(s => s.oninput = render);
+  dotSlider.oninput = () => { dotVal.textContent = dotSlider.value; render(); };
+  contrastSlider.oninput = () => { contrastVal.textContent = parseFloat(contrastSlider.value).toFixed(1); render(); };
 
-    function render() {
-        if(!img.src) return;
-        const dotSize = parseInt(dotSlider.value);
-        const contrast = parseFloat(contrastSlider.value);
-        dotLabel.innerHTML = `<i class="fas fa-braille"></i> Dot Size: ${dotSize}`;
+  function render() {
+    if (!img.src) return;
+    const dotSize = parseInt(dotSlider.value);
+    const contrast = parseFloat(contrastSlider.value);
+    const printWidth = 576;
+    const scale = printWidth / img.width;
+    canvas.width = printWidth;
+    canvas.height = img.height * scale;
 
-        const printWidth = 576; 
-        const scale = printWidth / img.width;
-        canvas.width = printWidth;
-        canvas.height = img.height * scale;
+    const tCanvas = document.createElement('canvas');
+    const tCtx = tCanvas.getContext('2d');
+    tCanvas.width = canvas.width;
+    tCanvas.height = canvas.height;
+    tCtx.drawImage(img, 0, 0, tCanvas.width, tCanvas.height);
 
-        const tCanvas = document.createElement('canvas');
-        const tCtx = tCanvas.getContext('2d');
-        tCanvas.width = canvas.width;
-        tCanvas.height = canvas.height;
-        tCtx.drawImage(img, 0, 0, tCanvas.width, tCanvas.height);
-        
-        const pixels = tCtx.getImageData(0, 0, tCanvas.width, tCanvas.height).data;
-        ctx.fillStyle = "white";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const pixels = tCtx.getImageData(0, 0, tCanvas.width, tCanvas.height).data;
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        for (let y = 0; y < canvas.height; y += dotSize) {
-            for (let x = 0; x < canvas.width; x += dotSize) {
-                let r=0, g=0, b=0, count=0;
-                for (let dy=0; dy<dotSize && y+dy<canvas.height; dy++) {
-                    for (let dx=0; dx<dotSize && x+dx<canvas.width; dx++) {
-                        let i = ((y+dy)*canvas.width + (x+dx))*4;
-                        r += pixels[i]; g += pixels[i+1]; b += pixels[i+2];
-                        count++;
-                    }
-                }
-                let gray = ((r+g+b)/3) / count;
-                gray = ((gray - 128) * contrast) + 128;
-                gray = Math.max(0, Math.min(255, gray));
-                let radius = (1 - (gray / 255)) * (dotSize / 1.7);
-                if (radius > 0.3) {
-                    ctx.beginPath();
-                    ctx.arc(x + dotSize/2, y + dotSize/2, radius, 0, Math.PI * 2);
-                    ctx.fillStyle = "black";
-                    ctx.fill();
-                }
-            }
+    for (let y = 0; y < canvas.height; y += dotSize) {
+      for (let x = 0; x < canvas.width; x += dotSize) {
+        let r = 0, g = 0, b = 0, count = 0;
+        for (let dy = 0; dy < dotSize && y + dy < canvas.height; dy++) {
+          for (let dx = 0; dx < dotSize && x + dx < canvas.width; dx++) {
+            let i = ((y + dy) * canvas.width + (x + dx)) * 4;
+            r += pixels[i]; g += pixels[i + 1]; b += pixels[i + 2];
+            count++;
+          }
         }
+        let gray = ((r + g + b) / 3) / count;
+        gray = ((gray - 128) * contrast) + 128;
+        gray = Math.max(0, Math.min(255, gray));
+        let radius = (1 - (gray / 255)) * (dotSize / 1.7);
+        if (radius > 0.3) {
+          ctx.beginPath();
+          ctx.arc(x + dotSize / 2, y + dotSize / 2, radius, 0, Math.PI * 2);
+          ctx.fillStyle = "black";
+          ctx.fill();
+        }
+      }
     }
+  }
 
-    saveBtn.onclick = () => {
-        if(!img.src) return alert("Please select an image!");
-        const dataUrl = canvas.toDataURL("image/png");
-        const link = document.createElement('a');
-        link.href = dataUrl;
-        link.download = 'pos_print_ready.png';
-        link.click();
-    };
+  saveBtn.onclick = () => {
+    if (!img.src) return;
+    const dataUrl = canvas.toDataURL("image/png");
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = 'dotpress_print_ready.png';
+    link.click();
+  };
 </script>
-
 </body>
 </html>
