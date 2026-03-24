@@ -134,6 +134,10 @@
       letter-spacing: 0.02em;
     }
 
+    .app-icon-container {
+      margin-bottom: 24px;
+    }
+
     .dot-deco { display: flex; gap: 5px; margin: 24px 0; }
     .dot-deco span { width: 6px; height: 6px; border-radius: 50%; background: var(--ink); display: block; }
     .dot-deco span:nth-child(2) { opacity: 0.4; }
@@ -221,6 +225,9 @@
       font-size: 22px;
       font-weight: 700;
       color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
     .app-header .brand span { color: var(--accent); }
@@ -436,7 +443,8 @@
       .login-btn { margin-top: 28px; padding: 18px 24px; font-size: 13px; }
 
       .app-header { padding: 14px 16px; }
-      .app-header .brand { font-size: 19px; }
+      .app-header .brand { font-size: 19px; gap: 8px; }
+      .brand svg { width: 22px; height: 22px; }
       .logout-btn { padding: 7px 12px; font-size: 9px; }
 
       .app-body { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
@@ -469,14 +477,30 @@
 </head>
 <body>
 
-<!-- LOGIN -->
 <div id="login-section">
   <div class="login-wrap">
     <div class="login-masthead">
       <p class="eyebrow">Thermal · Receipt · Studio</p>
+      
+      <div class="app-icon-container">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="24" height="24" rx="5" fill="var(--ink)"/>
+          <circle cx="7" cy="7" r="1.8" fill="var(--accent)"/>
+          <circle cx="12" cy="7" r="1.8" fill="var(--paper)"/>
+          <circle cx="17" cy="7" r="1.8" fill="var(--paper)"/>
+          <circle cx="7" cy="12" r="1.8" fill="var(--paper)"/>
+          <circle cx="12" cy="12" r="1.8" fill="var(--accent)"/>
+          <circle cx="17" cy="12" r="1.8" fill="var(--paper)"/>
+          <circle cx="7" cy="17" r="1.8" fill="var(--paper)"/>
+          <circle cx="12" cy="17" r="1.8" fill="var(--paper)"/>
+          <circle cx="17" cy="17" r="1.8" fill="var(--accent)"/>
+        </svg>
+      </div>
+
       <h1>Dot<span>Press</span></h1>
       <p class="tagline">Transform photographs into dot-matrix art, ready for your POS printer.</p>
     </div>
+    
     <div class="dot-deco">
       <span></span><span></span><span></span>
     </div>
@@ -503,10 +527,17 @@
   </div>
 </div>
 
-<!-- APP -->
 <div id="app-section">
   <header class="app-header">
-    <div class="brand">Dot<span>Press</span></div>
+    <div class="brand">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="24" height="24" rx="4" fill="var(--ink)"/>
+        <circle cx="7" cy="7" r="2" fill="var(--accent)"/>
+        <circle cx="12" cy="12" r="2" fill="var(--accent)"/>
+        <circle cx="17" cy="17" r="2" fill="var(--accent)"/>
+      </svg>
+      <div>Dot<span>Press</span></div>
+    </div>
     <div style="display:flex; align-items:center; gap:14px;">
       <div class="theme-toggle" onclick="toggleTheme()">
         <span class="theme-toggle-icon">☀️</span>
