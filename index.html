@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     :root {
       --ink: #0e0e0e;
@@ -16,10 +17,9 @@
       --accent-dark: #9e2f1e;
       --muted: #8a8070;
       --rule: #d4cebf;
-      --dot-preview: #2a2420;
       --toggle-bg: #d4cebf;
+      --glow: rgba(200, 64, 42, 0.18);
     }
-
     [data-theme="dark"] {
       --ink: #f0ebe0;
       --paper: #16130f;
@@ -28,50 +28,11 @@
       --accent-dark: #c8402a;
       --muted: #7a7060;
       --rule: #2e2820;
-      --dot-preview: #f0ebe0;
       --toggle-bg: #2e2820;
+      --glow: rgba(224, 90, 58, 0.22);
     }
 
-    /* ── THEME TOGGLE ──────────────────────────── */
-    .theme-toggle {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .theme-toggle-track {
-      width: 40px; height: 22px;
-      background: var(--toggle-bg);
-      border-radius: 11px;
-      position: relative;
-      transition: background 0.3s;
-      border: 1px solid var(--rule);
-      flex-shrink: 0;
-    }
-
-    .theme-toggle-thumb {
-      width: 16px; height: 16px;
-      background: var(--ink);
-      border-radius: 50%;
-      position: absolute;
-      top: 2px; left: 2px;
-      transition: transform 0.3s, background 0.3s;
-    }
-
-    [data-theme="dark"] .theme-toggle-thumb {
-      transform: translateX(18px);
-    }
-
-    .theme-toggle-icon {
-      font-size: 13px;
-      color: var(--muted);
-      width: 16px;
-      text-align: center;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       background: var(--paper);
@@ -79,72 +40,130 @@
       font-family: 'DM Sans', sans-serif;
       color: var(--ink);
       overflow-x: hidden;
-      transition: background 0.3s, color 0.3s;
+      transition: background 0.4s, color 0.4s;
     }
 
-    body::before {
+    /* Grain overlay */
+    body::after {
       content: '';
       position: fixed; inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
       pointer-events: none;
-      z-index: 1000;
-      opacity: 0.5;
+      z-index: 9999;
+      opacity: 0.4;
     }
 
+    /* ── ANIMATED DOTS BACKGROUND ── */
+    .dots-bg {
+      position: fixed; inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .dots-bg .dot-particle {
+      position: absolute;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: 0;
+      animation: floatDot linear infinite;
+    }
+    @keyframes floatDot {
+      0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+      10%  { opacity: 0.35; }
+      90%  { opacity: 0.35; }
+      100% { transform: translateY(-120px) scale(1); opacity: 0; }
+    }
+
+    /* ── LOGIN ── */
     #login-section {
       position: fixed; inset: 0;
       display: flex; align-items: center; justify-content: center;
       z-index: 100;
       background: var(--paper);
-      animation: fadeIn 0.5s ease;
-      transition: background 0.3s;
+      transition: background 0.4s;
     }
-
     .login-wrap {
-      width: 100%; max-width: 380px;
-      padding: 20px;
+      width: 100%; max-width: 400px;
+      padding: 48px 40px;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-radius: 8px;
+      box-shadow: 0 24px 80px rgba(14,14,14,0.1), 0 0 0 1px var(--rule);
+      position: relative;
+      animation: loginReveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+      overflow: hidden;
+    }
+    .login-wrap::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-dark), var(--accent));
+      background-size: 200% 100%;
+      animation: shimmer 2.5s linear infinite;
+    }
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    @keyframes loginReveal {
+      from { opacity: 0; transform: translateY(24px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
     }
 
-    .login-masthead { margin-bottom: 48px; }
-
-    .login-masthead .eyebrow {
+    .login-masthead { margin-bottom: 40px; animation: fadeUp 0.6s 0.15s both; }
+    .eyebrow {
       font-family: 'DM Mono', monospace;
       font-size: 10px;
       letter-spacing: 0.3em;
       text-transform: uppercase;
       color: var(--muted);
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
-
     .login-masthead h1 {
       font-family: 'Playfair Display', serif;
-      font-size: 52px;
+      font-size: 54px;
       font-weight: 900;
-      line-height: 0.95;
+      line-height: 0.92;
       color: var(--ink);
     }
-
-    .login-masthead h1 span { color: var(--accent); }
-
+    .login-masthead h1 span {
+      color: var(--accent);
+      display: inline-block;
+      animation: accentPulse 3s ease-in-out infinite;
+    }
+    @keyframes accentPulse {
+      0%, 100% { text-shadow: 0 0 0 transparent; }
+      50% { text-shadow: 0 0 24px var(--glow); }
+    }
     .login-masthead .tagline {
-      margin-top: 14px;
+      margin-top: 12px;
       font-size: 13px;
       color: var(--muted);
       font-weight: 300;
-      letter-spacing: 0.02em;
     }
 
-    .app-icon-container {
-      margin-bottom: 24px;
+    .app-icon-wrap { margin-bottom: 20px; animation: fadeUp 0.5s 0.05s both; }
+    .app-icon-wrap svg { animation: iconSpin 8s linear infinite; transform-origin: center; }
+    @keyframes iconSpin {
+      0%, 100% { transform: rotate(0deg); }
+      25%       { transform: rotate(5deg); }
+      75%       { transform: rotate(-5deg); }
     }
 
-    .dot-deco { display: flex; gap: 5px; margin: 24px 0; }
-    .dot-deco span { width: 6px; height: 6px; border-radius: 50%; background: var(--ink); display: block; }
-    .dot-deco span:nth-child(2) { opacity: 0.4; }
-    .dot-deco span:nth-child(3) { opacity: 0.15; }
+    .dot-deco { display: flex; gap: 5px; margin: 20px 0; animation: fadeUp 0.5s 0.2s both; }
+    .dot-deco span {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--ink); display: block;
+      animation: dotBounce 1.8s ease-in-out infinite;
+    }
+    .dot-deco span:nth-child(2) { opacity: 0.4; animation-delay: 0.15s; }
+    .dot-deco span:nth-child(3) { opacity: 0.15; animation-delay: 0.3s; }
+    @keyframes dotBounce {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-4px); }
+    }
 
-    .field { margin-bottom: 20px; }
-
+    .field { margin-bottom: 20px; animation: fadeUp 0.5s 0.25s both; }
     .field label {
       font-family: 'DM Mono', monospace;
       font-size: 10px;
@@ -154,7 +173,6 @@
       display: block;
       margin-bottom: 8px;
     }
-
     .field input {
       width: 100%;
       background: transparent;
@@ -167,70 +185,97 @@
       outline: none;
       transition: border-color 0.25s;
     }
-
-    .field input:focus { border-bottom-color: var(--ink); }
+    .field input:focus { border-bottom-color: var(--accent); }
     .field input::placeholder { color: var(--rule); }
 
     .login-btn {
-      margin-top: 36px;
+      margin-top: 32px;
       width: 100%;
       background: var(--ink);
       color: var(--paper);
       border: none;
-      padding: 16px 24px;
+      padding: 15px 24px;
       font-family: 'DM Mono', monospace;
       font-size: 12px;
       letter-spacing: 0.25em;
       text-transform: uppercase;
       cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-      border-radius: 2px;
+      border-radius: 3px;
+      transition: background 0.25s, transform 0.1s, box-shadow 0.25s;
+      position: relative;
+      overflow: hidden;
+      animation: fadeUp 0.5s 0.35s both;
     }
-
-    .login-btn:hover { background: var(--accent); }
-    .login-btn:active { transform: scale(0.99); }
+    .login-btn::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.08) 60%, transparent 80%);
+      transform: translateX(-100%);
+      transition: transform 0.5s;
+    }
+    .login-btn:hover { background: var(--accent); box-shadow: 0 8px 24px var(--glow); }
+    .login-btn:hover::before { transform: translateX(100%); }
+    .login-btn:active { transform: scale(0.985); }
 
     .error-msg {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--accent);
       font-family: 'DM Mono', monospace;
       margin-top: 12px;
       display: none;
-      letter-spacing: 0.05em;
+      animation: shakeError 0.4s ease;
+    }
+    @keyframes shakeError {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-6px); }
+      60% { transform: translateX(6px); }
+      80% { transform: translateX(-3px); }
     }
 
-    #app-section {
-      display: none;
-      min-height: 100vh;
-      animation: fadeIn 0.5s ease;
+    /* ── THEME TOGGLE ── */
+    .theme-toggle { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
+    .theme-toggle-track {
+      width: 40px; height: 22px;
+      background: var(--toggle-bg);
+      border-radius: 11px;
+      position: relative;
+      transition: background 0.3s;
+      border: 1px solid var(--rule);
     }
+    .theme-toggle-thumb {
+      width: 16px; height: 16px;
+      background: var(--ink);
+      border-radius: 50%;
+      position: absolute;
+      top: 2px; left: 2px;
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s;
+    }
+    [data-theme="dark"] .theme-toggle-thumb { transform: translateX(18px); }
+    .theme-toggle-icon { font-size: 13px; color: var(--muted); }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    /* ── APP ── */
+    #app-section { display: none; min-height: 100vh; animation: fadeIn 0.5s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeUp  { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 
     .app-header {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 20px 32px;
+      padding: 16px 32px;
       border-bottom: 1px solid var(--rule);
       position: sticky; top: 0;
       background: var(--paper);
       z-index: 50;
       transition: background 0.3s, border-color 0.3s;
+      backdrop-filter: blur(8px);
     }
-
-    .app-header .brand {
+    .brand {
       font-family: 'Playfair Display', serif;
       font-size: 22px;
       font-weight: 700;
       color: var(--ink);
-      display: flex;
-      align-items: center;
-      gap: 12px;
+      display: flex; align-items: center; gap: 12px;
     }
-
-    .app-header .brand span { color: var(--accent); }
+    .brand span { color: var(--accent); }
 
     .logout-btn {
       font-family: 'DM Mono', monospace;
@@ -240,103 +285,94 @@
       color: var(--muted);
       background: none;
       border: 1px solid var(--rule);
-      padding: 8px 14px;
+      padding: 7px 14px;
       cursor: pointer;
-      border-radius: 2px;
+      border-radius: 3px;
       transition: all 0.2s;
     }
-
     .logout-btn:hover { border-color: var(--accent); color: var(--accent); }
 
     .app-body {
       display: grid;
       grid-template-columns: 320px 1fr;
-      min-height: calc(100vh - 65px);
+      min-height: calc(100vh - 64px);
     }
 
+    /* ── SIDEBAR ── */
     .sidebar {
       border-right: 1px solid var(--rule);
-      padding: 32px 28px;
-      display: flex;
-      flex-direction: column;
-      gap: 32px;
+      padding: 32px 24px;
+      display: flex; flex-direction: column; gap: 28px;
       background: var(--paper);
       transition: background 0.3s, border-color 0.3s;
     }
-
     .sidebar-section-title {
       font-family: 'DM Mono', monospace;
       font-size: 9px;
       letter-spacing: 0.3em;
       text-transform: uppercase;
       color: var(--muted);
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
+    /* ── UPLOAD ZONE ── */
     .upload-zone {
       border: 1.5px dashed var(--rule);
-      border-radius: 4px;
-      padding: 32px 20px;
+      border-radius: 6px;
+      padding: 28px 16px;
       text-align: center;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: border-color 0.25s, background 0.25s, transform 0.2s, box-shadow 0.25s;
       position: relative;
       background: var(--cream);
+      overflow: hidden;
     }
-
-    .upload-zone:hover { border-color: var(--ink); }
-    .upload-zone.has-image { border-style: solid; border-color: var(--ink); }
-
-    .upload-zone input[type="file"] {
+    .upload-zone::after {
+      content: '';
       position: absolute; inset: 0;
-      opacity: 0; cursor: pointer;
-      width: 100%; height: 100%;
+      background: radial-gradient(circle at 50% 50%, var(--glow), transparent 70%);
+      opacity: 0;
+      transition: opacity 0.35s;
+      pointer-events: none;
     }
-
-    .upload-icon { font-size: 28px; margin-bottom: 10px; color: var(--muted); }
-    .upload-zone p { font-size: 12px; color: var(--muted); line-height: 1.5; }
-
-    .upload-zone .upload-hint {
-      font-family: 'DM Mono', monospace;
-      font-size: 10px;
-      color: var(--accent);
-      margin-top: 6px;
+    .upload-zone:hover { border-color: var(--ink); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+    .upload-zone:hover::after { opacity: 1; }
+    .upload-zone.has-image { border-style: solid; border-color: var(--accent); background: var(--cream); }
+    .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .upload-icon {
+      font-size: 28px; margin-bottom: 8px; color: var(--muted);
+      display: inline-block;
+      animation: uploadPulse 2s ease-in-out infinite;
     }
-
-    .control-block { display: flex; flex-direction: column; gap: 24px; }
-
-    .control-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 10px;
+    .upload-zone.has-image .upload-icon { animation: none; color: var(--accent); }
+    @keyframes uploadPulse {
+      0%, 100% { transform: scale(1); opacity: 0.7; }
+      50%       { transform: scale(1.12); opacity: 1; }
     }
+    .upload-zone p { font-size: 12px; color: var(--muted); line-height: 1.6; }
+    .upload-hint { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent); margin-top: 6px; }
 
-    .control-name {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      letter-spacing: 0.1em;
-      color: var(--ink);
-    }
-
+    /* ── SLIDERS ── */
+    .control-item { margin-bottom: 4px; }
+    .control-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+    .control-name { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: var(--ink); }
     .control-val {
       font-family: 'Playfair Display', serif;
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--accent);
-      line-height: 1;
+      font-size: 20px; font-weight: 700;
+      color: var(--accent); line-height: 1;
+      transition: transform 0.15s;
     }
+    .control-val.bump { animation: valBump 0.18s ease; }
+    @keyframes valBump { 0%,100% { transform: scale(1); } 50% { transform: scale(1.25); } }
 
     input[type="range"] {
       -webkit-appearance: none;
-      width: 100%;
-      height: 2px;
+      width: 100%; height: 2px;
       background: var(--rule);
       border-radius: 2px;
-      outline: none;
-      cursor: pointer;
+      outline: none; cursor: pointer;
+      transition: background 0.2s;
     }
-
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
       width: 14px; height: 14px;
@@ -344,64 +380,71 @@
       background: var(--ink);
       border: 2px solid var(--paper);
       box-shadow: 0 0 0 1.5px var(--ink);
-      transition: background 0.2s, transform 0.15s;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
     }
-
     input[type="range"]:hover::-webkit-slider-thumb {
       background: var(--accent);
-      box-shadow: 0 0 0 1.5px var(--accent);
-      transform: scale(1.2);
+      box-shadow: 0 0 0 1.5px var(--accent), 0 0 12px var(--glow);
+      transform: scale(1.25);
     }
 
+    /* ── DOWNLOAD BUTTON ── */
     .dl-btn {
-      margin-top: auto;
       width: 100%;
       background: var(--accent);
       color: white;
       border: none;
-      padding: 16px;
+      padding: 15px;
       font-family: 'DM Mono', monospace;
       font-size: 11px;
       letter-spacing: 0.2em;
       text-transform: uppercase;
       cursor: pointer;
-      border-radius: 2px;
-      transition: background 0.2s, transform 0.1s;
+      border-radius: 3px;
+      transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
       display: flex; align-items: center; justify-content: center; gap: 10px;
+      position: relative; overflow: hidden;
     }
-
-    .dl-btn:hover { background: var(--accent-dark); }
-    .dl-btn:active { transform: scale(0.99); }
+    .dl-btn::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.1) 60%, transparent 80%);
+      transform: translateX(-100%);
+      transition: transform 0.5s;
+    }
+    .dl-btn:hover:not(:disabled) { background: var(--accent-dark); box-shadow: 0 8px 28px var(--glow); }
+    .dl-btn:hover:not(:disabled)::before { transform: translateX(100%); }
+    .dl-btn:active:not(:disabled) { transform: scale(0.985); }
     .dl-btn:disabled { background: var(--rule); color: var(--muted); cursor: not-allowed; }
 
+    /* ── CANVAS AREA ── */
     .canvas-area {
       padding: 40px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-start;
       background: var(--cream);
       position: relative;
       transition: background 0.3s;
     }
-
     .canvas-area::before {
       content: '';
       position: absolute; inset: 0;
       background-image: radial-gradient(circle, var(--rule) 1px, transparent 1px);
       background-size: 24px 24px;
-      opacity: 0.4;
+      opacity: 0.45;
       pointer-events: none;
+      animation: gridShift 20s linear infinite;
+    }
+    @keyframes gridShift {
+      from { background-position: 0 0; }
+      to   { background-position: 24px 24px; }
     }
 
     .canvas-wrap { position: relative; z-index: 1; width: 100%; max-width: 576px; }
-
     .canvas-label {
       font-family: 'DM Mono', monospace;
-      font-size: 9px;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: var(--muted);
+      font-size: 9px; letter-spacing: 0.3em;
+      text-transform: uppercase; color: var(--muted);
       margin-bottom: 12px;
     }
 
@@ -411,99 +454,129 @@
       display: block;
       background: white;
       box-shadow: 0 8px 40px rgba(14,14,14,0.08);
+      transition: box-shadow 0.3s;
+      border-radius: 2px;
     }
+    canvas:hover { box-shadow: 0 16px 56px rgba(14,14,14,0.14); }
 
+    /* ── EMPTY STATE ── */
     .empty-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
       height: 360px;
       border: 1.5px dashed var(--rule);
       background: white;
       color: var(--muted);
-      gap: 16px;
+      gap: 20px;
+      border-radius: 2px;
+      position: relative;
+      overflow: hidden;
+    }
+    .empty-state::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 80%, var(--glow), transparent 65%);
+      pointer-events: none;
     }
 
-    .big-dot { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
-    .big-dot span { width: 8px; height: 8px; background: var(--rule); border-radius: 50%; display: block; }
-    .big-dot span:nth-child(3), .big-dot span:nth-child(7),
-    .big-dot span:nth-child(9), .big-dot span:nth-child(11),
-    .big-dot span:nth-child(13), .big-dot span:nth-child(17),
-    .big-dot span:nth-child(23) { background: var(--muted); }
+    /* Animated dot grid */
+    .dot-grid-anim {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+    }
+    .dot-grid-anim span {
+      width: 8px; height: 8px;
+      background: var(--rule);
+      border-radius: 50%;
+      display: block;
+      animation: dotWave 2.2s ease-in-out infinite;
+    }
+    .empty-state p { font-size: 13px; font-weight: 300; position: relative; }
 
-    .empty-state p { font-size: 13px; font-weight: 300; }
+    /* ── RENDERING BADGE ── */
+    .rendering-badge {
+      display: none;
+      align-items: center; gap: 8px;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .rendering-badge.active { display: flex; }
+    .render-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: blink 0.8s ease-in-out infinite alternate;
+    }
+    @keyframes blink { from { opacity: 1; } to { opacity: 0.2; } }
 
-    /* ── MOBILE RESPONSIVE ─────────────────────── */
+    /* ── PROGRESS BAR ── */
+    .render-progress {
+      width: 100%;
+      height: 2px;
+      background: var(--rule);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 8px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .render-progress.active { opacity: 1; }
+    .render-progress-bar {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.1s;
+      border-radius: 2px;
+    }
+
+    /* ── MOBILE ── */
     @media (max-width: 768px) {
-      .login-wrap { padding: 32px 24px; max-width: 100%; }
-      .login-masthead { margin-bottom: 36px; }
-      .login-masthead h1 { font-size: 42px; }
-      .login-masthead .tagline { font-size: 12px; }
-      .login-btn { margin-top: 28px; padding: 18px 24px; font-size: 13px; }
-
-      .app-header { padding: 14px 16px; }
-      .app-header .brand { font-size: 19px; gap: 8px; }
-      .brand svg { width: 22px; height: 22px; }
-      .logout-btn { padding: 7px 12px; font-size: 9px; }
-
-      .app-body { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+      .login-wrap { padding: 32px 24px; max-width: 100%; border-left: none; border-right: none; }
+      .login-masthead h1 { font-size: 44px; }
+      .app-header { padding: 12px 16px; }
+      .app-body { grid-template-columns: 1fr; }
       .sidebar { border-right: none; border-bottom: 1px solid var(--rule); padding: 20px 16px; gap: 20px; }
-      .sidebar-section-title { font-size: 8px; margin-bottom: 12px; }
-
-      .upload-zone { padding: 20px 16px; }
-      .upload-icon { font-size: 22px; margin-bottom: 6px; }
-
-      .control-block { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-      .control-val { font-size: 17px; }
-      input[type="range"]::-webkit-slider-thumb { width: 18px; height: 18px; }
-
-      .dl-btn { padding: 18px; font-size: 12px; letter-spacing: 0.15em; border-radius: 4px; position: sticky; bottom: 0; z-index: 10; }
-
-      .canvas-area { padding: 16px; min-height: 50vh; }
+      .canvas-area { padding: 20px 16px; }
       .canvas-area::before { background-size: 18px 18px; }
-      .canvas-wrap { max-width: 100%; }
-      .canvas-label { font-size: 8px; margin-bottom: 8px; }
-      canvas { box-shadow: 0 4px 20px rgba(14,14,14,0.1); }
-      .empty-state { height: 240px; }
-    }
-
-    @media (max-width: 380px) {
-      .login-masthead h1 { font-size: 36px; }
-      .control-block { grid-template-columns: 1fr; }
-      .app-header { padding: 12px 14px; }
+      .empty-state { height: 260px; }
     }
   </style>
 </head>
 <body>
 
+<!-- Animated floating dots background -->
+<div class="dots-bg" id="dotsBg"></div>
+
+<!-- ═══ LOGIN ═══ -->
 <div id="login-section">
   <div class="login-wrap">
+    <div class="app-icon-wrap">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="24" height="24" rx="5" fill="var(--ink)"/>
+        <circle cx="7" cy="7" r="1.8" fill="var(--accent)"/>
+        <circle cx="12" cy="7" r="1.8" fill="var(--paper)"/>
+        <circle cx="17" cy="7" r="1.8" fill="var(--paper)"/>
+        <circle cx="7" cy="12" r="1.8" fill="var(--paper)"/>
+        <circle cx="12" cy="12" r="1.8" fill="var(--accent)"/>
+        <circle cx="17" cy="12" r="1.8" fill="var(--paper)"/>
+        <circle cx="7" cy="17" r="1.8" fill="var(--paper)"/>
+        <circle cx="12" cy="17" r="1.8" fill="var(--paper)"/>
+        <circle cx="17" cy="17" r="1.8" fill="var(--accent)"/>
+      </svg>
+    </div>
+
     <div class="login-masthead">
       <p class="eyebrow">Thermal · Receipt · Studio</p>
-      
-      <div class="app-icon-container">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="24" height="24" rx="5" fill="var(--ink)"/>
-          <circle cx="7" cy="7" r="1.8" fill="var(--accent)"/>
-          <circle cx="12" cy="7" r="1.8" fill="var(--paper)"/>
-          <circle cx="17" cy="7" r="1.8" fill="var(--paper)"/>
-          <circle cx="7" cy="12" r="1.8" fill="var(--paper)"/>
-          <circle cx="12" cy="12" r="1.8" fill="var(--accent)"/>
-          <circle cx="17" cy="12" r="1.8" fill="var(--paper)"/>
-          <circle cx="7" cy="17" r="1.8" fill="var(--paper)"/>
-          <circle cx="12" cy="17" r="1.8" fill="var(--paper)"/>
-          <circle cx="17" cy="17" r="1.8" fill="var(--accent)"/>
-        </svg>
-      </div>
-
       <h1>Dot<span>Press</span></h1>
       <p class="tagline">Transform photographs into dot-matrix art, ready for your POS printer.</p>
     </div>
-    
-    <div class="dot-deco">
-      <span></span><span></span><span></span>
-    </div>
+
+    <div class="dot-deco"><span></span><span></span><span></span></div>
+
     <div class="field">
       <label>Username</label>
       <input type="text" id="username" placeholder="Enter username" autocomplete="off">
@@ -512,38 +585,36 @@
       <label>Password</label>
       <input type="password" id="password" placeholder="········">
     </div>
+
     <button class="login-btn" onclick="checkLogin()">Enter Studio →</button>
     <p id="error" class="error-msg">✕ &nbsp;Invalid credentials. Please try again.</p>
 
-    <div style="margin-top: 28px; display: flex; justify-content: center;">
+    <div class="d-flex justify-content-center mt-4">
       <div class="theme-toggle" onclick="toggleTheme()">
         <span class="theme-toggle-icon">☀️</span>
-        <div class="theme-toggle-track">
-          <div class="theme-toggle-thumb"></div>
-        </div>
+        <div class="theme-toggle-track"><div class="theme-toggle-thumb"></div></div>
         <span class="theme-toggle-icon">🌙</span>
       </div>
     </div>
   </div>
 </div>
 
+<!-- ═══ APP ═══ -->
 <div id="app-section">
   <header class="app-header">
     <div class="brand">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
         <rect width="24" height="24" rx="4" fill="var(--ink)"/>
         <circle cx="7" cy="7" r="2" fill="var(--accent)"/>
         <circle cx="12" cy="12" r="2" fill="var(--accent)"/>
         <circle cx="17" cy="17" r="2" fill="var(--accent)"/>
       </svg>
-      <div>Dot<span>Press</span></div>
+      Dot<span>Press</span>
     </div>
-    <div style="display:flex; align-items:center; gap:14px;">
+    <div class="d-flex align-items-center gap-3">
       <div class="theme-toggle" onclick="toggleTheme()">
         <span class="theme-toggle-icon">☀️</span>
-        <div class="theme-toggle-track">
-          <div class="theme-toggle-thumb"></div>
-        </div>
+        <div class="theme-toggle-track"><div class="theme-toggle-thumb"></div></div>
         <span class="theme-toggle-icon">🌙</span>
       </div>
       <button class="logout-btn" onclick="logout()">Sign Out</button>
@@ -551,19 +622,24 @@
   </header>
 
   <div class="app-body">
+    <!-- Sidebar -->
     <aside class="sidebar">
+
+      <!-- Upload -->
       <div>
         <p class="sidebar-section-title">01 — Source Image</p>
         <div class="upload-zone" id="uploadZone">
           <input type="file" id="upload" accept="image/*">
           <div class="upload-icon">⊕</div>
           <p>Drop an image here<br>or click to browse</p>
-          <p class="upload-hint">PNG, JPG, WEBP</p>
+          <p class="upload-hint">PNG · JPG · WEBP</p>
         </div>
       </div>
+
+      <!-- Controls -->
       <div>
         <p class="sidebar-section-title">02 — Rendering</p>
-        <div class="control-block">
+        <div class="d-flex flex-column gap-4">
           <div class="control-item">
             <div class="control-header">
               <span class="control-name">Dot Size</span>
@@ -580,25 +656,43 @@
           </div>
         </div>
       </div>
-      <button class="dl-btn" id="saveBtn" disabled>
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+      <!-- Stats badge (shown after image load) -->
+      <div id="statsBadge" style="display:none;">
+        <p class="sidebar-section-title">03 — Output Info</p>
+        <div style="border:1px solid var(--rule); border-radius:4px; padding:14px; font-family:'DM Mono',monospace; font-size:11px; color:var(--muted); line-height:2;">
+          <div>Width: <span style="color:var(--ink)" id="statW">—</span></div>
+          <div>Height: <span style="color:var(--ink)" id="statH">—</span></div>
+          <div>Dots/row: <span style="color:var(--accent)" id="statDots">—</span></div>
+        </div>
+      </div>
+
+      <!-- Download -->
+      <button class="dl-btn mt-auto" id="saveBtn" disabled>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
           <path d="M7 1v8M4 6l3 3 3-3M2 11h10" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         Download Print File
       </button>
     </aside>
 
+    <!-- Canvas -->
     <main class="canvas-area">
       <div class="canvas-wrap">
-        <p class="canvas-label">Preview — 576px print width</p>
-        <div id="emptyState" class="empty-state">
-          <div class="big-dot">
-            <span></span><span></span><span></span><span></span><span></span>
-            <span></span><span></span><span></span><span></span><span></span>
-            <span></span><span></span><span></span><span></span><span></span>
-            <span></span><span></span><span></span><span></span><span></span>
-            <span></span><span></span><span></span><span></span><span></span>
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <p class="canvas-label mb-0">Preview — 576px print width</p>
+          <div class="rendering-badge" id="renderBadge">
+            <div class="render-dot"></div> Rendering
           </div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="render-progress" id="renderProgress">
+          <div class="render-progress-bar" id="renderBar"></div>
+        </div>
+
+        <div id="emptyState" class="empty-state">
+          <div class="dot-grid-anim" id="dotGrid"></div>
           <p>Upload an image to begin</p>
         </div>
         <canvas id="canvas" style="display:none;"></canvas>
@@ -607,30 +701,68 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  const VALID_USER = "admin";
-  const VALID_PASS = "1234";
+  /* ── FLOATING DOTS BACKGROUND ── */
+  (function() {
+    const bg = document.getElementById('dotsBg');
+    for (let i = 0; i < 18; i++) {
+      const d = document.createElement('div');
+      d.className = 'dot-particle';
+      const size = Math.random() * 6 + 3;
+      d.style.cssText = `
+        width:${size}px; height:${size}px;
+        left:${Math.random() * 100}%;
+        animation-duration:${Math.random() * 14 + 10}s;
+        animation-delay:${Math.random() * -15}s;
+      `;
+      bg.appendChild(d);
+    }
+  })();
 
-  // Theme
+  /* ── ANIMATED DOT GRID EMPTY STATE ── */
+  (function() {
+    const grid = document.getElementById('dotGrid');
+    for (let i = 0; i < 35; i++) {
+      const s = document.createElement('span');
+      const d = (Math.floor(i / 7) + i % 7) * 0.08;
+      s.style.animationDelay = `${d}s`;
+      s.style.background = Math.random() > 0.65 ? 'var(--muted)' : 'var(--rule)';
+      grid.appendChild(s);
+    }
+  })();
+
+  /* ── THEME ── */
   function toggleTheme() {
     const html = document.documentElement;
     const isDark = html.getAttribute('data-theme') === 'dark';
     html.setAttribute('data-theme', isDark ? 'light' : 'dark');
     localStorage.setItem('dotpress-theme', isDark ? 'light' : 'dark');
   }
-
-  // Restore saved theme
   const savedTheme = localStorage.getItem('dotpress-theme');
   if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+
+  /* ── AUTH ── */
+  const VALID_USER = "admin", VALID_PASS = "1234";
 
   function checkLogin() {
     const u = document.getElementById('username').value;
     const p = document.getElementById('password').value;
     if (u === VALID_USER && p === VALID_PASS) {
-      document.getElementById('login-section').style.display = 'none';
-      document.getElementById('app-section').style.display = 'block';
+      const loginSection = document.getElementById('login-section');
+      loginSection.style.transition = 'opacity 0.4s, transform 0.4s';
+      loginSection.style.opacity = '0';
+      loginSection.style.transform = 'scale(0.97)';
+      setTimeout(() => {
+        loginSection.style.display = 'none';
+        document.getElementById('app-section').style.display = 'block';
+      }, 400);
     } else {
-      document.getElementById('error').style.display = 'block';
+      const err = document.getElementById('error');
+      err.style.display = 'block';
+      err.style.animation = 'none';
+      void err.offsetWidth;
+      err.style.animation = 'shakeError 0.4s ease';
     }
   }
 
@@ -640,49 +772,79 @@
 
   function logout() { location.reload(); }
 
-  const upload = document.getElementById('upload');
-  const canvas = document.getElementById('canvas');
-  const ctx = canvas.getContext('2d');
-  const dotSlider = document.getElementById('dotSlider');
+  /* ── CANVAS LOGIC ── */
+  const upload      = document.getElementById('upload');
+  const canvas      = document.getElementById('canvas');
+  const ctx         = canvas.getContext('2d');
+  const dotSlider   = document.getElementById('dotSlider');
   const contrastSlider = document.getElementById('contrastSlider');
-  const dotVal = document.getElementById('dotVal');
-  const contrastVal = document.getElementById('contrastVal');
-  const saveBtn = document.getElementById('saveBtn');
-  const uploadZone = document.getElementById('uploadZone');
-  const emptyState = document.getElementById('emptyState');
+  const dotValEl    = document.getElementById('dotVal');
+  const contrastValEl = document.getElementById('contrastVal');
+  const saveBtn     = document.getElementById('saveBtn');
+  const uploadZone  = document.getElementById('uploadZone');
+  const emptyState  = document.getElementById('emptyState');
+  const renderBadge = document.getElementById('renderBadge');
+  const renderProgress = document.getElementById('renderProgress');
+  const renderBar   = document.getElementById('renderBar');
+  const statsBadge  = document.getElementById('statsBadge');
 
   let img = new Image();
+  let renderTimer = null;
+
+  function bumpVal(el) {
+    el.classList.remove('bump');
+    void el.offsetWidth;
+    el.classList.add('bump');
+  }
 
   upload.onchange = (e) => {
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = (ev) => {
       img.onload = () => {
         uploadZone.classList.add('has-image');
-        uploadZone.querySelector('p:not(.upload-hint)').textContent = 'Image loaded ✓';
+        uploadZone.querySelector('p:not(.upload-hint)').innerHTML = 'Image loaded ✓';
         emptyState.style.display = 'none';
         canvas.style.display = 'block';
         saveBtn.disabled = false;
-        render();
+        statsBadge.style.display = 'block';
+        scheduleRender();
       };
-      img.src = event.target.result;
+      img.src = ev.target.result;
     };
     reader.readAsDataURL(e.target.files[0]);
   };
 
-  dotSlider.oninput = () => { dotVal.textContent = dotSlider.value; render(); };
-  contrastSlider.oninput = () => { contrastVal.textContent = parseFloat(contrastSlider.value).toFixed(1); render(); };
+  dotSlider.oninput = () => {
+    dotValEl.textContent = dotSlider.value;
+    bumpVal(dotValEl);
+    scheduleRender();
+  };
+  contrastSlider.oninput = () => {
+    contrastValEl.textContent = parseFloat(contrastSlider.value).toFixed(1);
+    bumpVal(contrastValEl);
+    scheduleRender();
+  };
+
+  function scheduleRender() {
+    clearTimeout(renderTimer);
+    renderBadge.classList.add('active');
+    renderProgress.classList.add('active');
+    renderBar.style.width = '0%';
+    renderTimer = setTimeout(() => render(), 80);
+  }
 
   function render() {
     if (!img.src) return;
-    const dotSize = parseInt(dotSlider.value);
+    const dotSize  = parseInt(dotSlider.value);
     const contrast = parseFloat(contrastSlider.value);
     const printWidth = 576;
-    const scale = printWidth / img.width;
-    canvas.width = printWidth;
-    canvas.height = img.height * scale;
+    const scale    = printWidth / img.width;
+
+    canvas.width  = printWidth;
+    canvas.height = Math.round(img.height * scale);
 
     const tCanvas = document.createElement('canvas');
-    const tCtx = tCanvas.getContext('2d');
+    const tCtx    = tCanvas.getContext('2d');
     tCanvas.width = canvas.width;
     tCanvas.height = canvas.height;
     tCtx.drawImage(img, 0, 0, tCanvas.width, tCanvas.height);
@@ -691,28 +853,54 @@
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    for (let y = 0; y < canvas.height; y += dotSize) {
-      for (let x = 0; x < canvas.width; x += dotSize) {
-        let r = 0, g = 0, b = 0, count = 0;
-        for (let dy = 0; dy < dotSize && y + dy < canvas.height; dy++) {
-          for (let dx = 0; dx < dotSize && x + dx < canvas.width; dx++) {
-            let i = ((y + dy) * canvas.width + (x + dx)) * 4;
-            r += pixels[i]; g += pixels[i + 1]; b += pixels[i + 2];
-            count++;
+    const totalRows = Math.ceil(canvas.height / dotSize);
+    let rowsDone = 0;
+
+    function renderChunk(startY) {
+      const chunkSize = 40;
+      const endY = Math.min(startY + chunkSize * dotSize, canvas.height);
+
+      for (let y = startY; y < endY; y += dotSize) {
+        for (let x = 0; x < canvas.width; x += dotSize) {
+          let r = 0, g = 0, b = 0, count = 0;
+          for (let dy = 0; dy < dotSize && y + dy < canvas.height; dy++) {
+            for (let dx = 0; dx < dotSize && x + dx < canvas.width; dx++) {
+              let i = ((y + dy) * canvas.width + (x + dx)) * 4;
+              r += pixels[i]; g += pixels[i+1]; b += pixels[i+2];
+              count++;
+            }
+          }
+          let gray = ((r + g + b) / 3) / count;
+          gray = ((gray - 128) * contrast) + 128;
+          gray = Math.max(0, Math.min(255, gray));
+          let radius = (1 - (gray / 255)) * (dotSize / 1.7);
+          if (radius > 0.3) {
+            ctx.beginPath();
+            ctx.arc(x + dotSize / 2, y + dotSize / 2, radius, 0, Math.PI * 2);
+            ctx.fillStyle = "black";
+            ctx.fill();
           }
         }
-        let gray = ((r + g + b) / 3) / count;
-        gray = ((gray - 128) * contrast) + 128;
-        gray = Math.max(0, Math.min(255, gray));
-        let radius = (1 - (gray / 255)) * (dotSize / 1.7);
-        if (radius > 0.3) {
-          ctx.beginPath();
-          ctx.arc(x + dotSize / 2, y + dotSize / 2, radius, 0, Math.PI * 2);
-          ctx.fillStyle = "black";
-          ctx.fill();
-        }
+        rowsDone++;
+      }
+
+      const pct = Math.round((rowsDone / totalRows) * 100);
+      renderBar.style.width = pct + '%';
+
+      if (endY < canvas.height) {
+        requestAnimationFrame(() => renderChunk(endY));
+      } else {
+        renderBadge.classList.remove('active');
+        setTimeout(() => { renderProgress.classList.remove('active'); }, 400);
+
+        // Update stats
+        document.getElementById('statW').textContent = canvas.width + 'px';
+        document.getElementById('statH').textContent = canvas.height + 'px';
+        document.getElementById('statDots').textContent = Math.floor(canvas.width / dotSize);
       }
     }
+
+    renderChunk(0);
   }
 
   saveBtn.onclick = () => {
@@ -722,6 +910,14 @@
     link.href = dataUrl;
     link.download = 'dotpress_print_ready.png';
     link.click();
+
+    // Brief button feedback
+    saveBtn.textContent = '✓ Saved!';
+    saveBtn.style.background = '#2a7a4a';
+    setTimeout(() => {
+      saveBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v8M4 6l3 3 3-3M2 11h10" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Download Print File`;
+      saveBtn.style.background = '';
+    }, 2000);
   };
 </script>
 </body>
