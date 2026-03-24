@@ -17,6 +17,58 @@
       --muted: #8a8070;
       --rule: #d4cebf;
       --dot-preview: #2a2420;
+      --toggle-bg: #d4cebf;
+    }
+
+    [data-theme="dark"] {
+      --ink: #f0ebe0;
+      --paper: #16130f;
+      --cream: #1e1a15;
+      --accent: #e05a3a;
+      --accent-dark: #c8402a;
+      --muted: #7a7060;
+      --rule: #2e2820;
+      --dot-preview: #f0ebe0;
+      --toggle-bg: #2e2820;
+    }
+
+    /* ── THEME TOGGLE ──────────────────────────── */
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .theme-toggle-track {
+      width: 40px; height: 22px;
+      background: var(--toggle-bg);
+      border-radius: 11px;
+      position: relative;
+      transition: background 0.3s;
+      border: 1px solid var(--rule);
+      flex-shrink: 0;
+    }
+
+    .theme-toggle-thumb {
+      width: 16px; height: 16px;
+      background: var(--ink);
+      border-radius: 50%;
+      position: absolute;
+      top: 2px; left: 2px;
+      transition: transform 0.3s, background 0.3s;
+    }
+
+    [data-theme="dark"] .theme-toggle-thumb {
+      transform: translateX(18px);
+    }
+
+    .theme-toggle-icon {
+      font-size: 13px;
+      color: var(--muted);
+      width: 16px;
+      text-align: center;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -27,6 +79,7 @@
       font-family: 'DM Sans', sans-serif;
       color: var(--ink);
       overflow-x: hidden;
+      transition: background 0.3s, color 0.3s;
     }
 
     body::before {
@@ -44,6 +97,7 @@
       z-index: 100;
       background: var(--paper);
       animation: fadeIn 0.5s ease;
+      transition: background 0.3s;
     }
 
     .login-wrap {
@@ -159,6 +213,7 @@
       position: sticky; top: 0;
       background: var(--paper);
       z-index: 50;
+      transition: background 0.3s, border-color 0.3s;
     }
 
     .app-header .brand {
@@ -198,6 +253,8 @@
       display: flex;
       flex-direction: column;
       gap: 32px;
+      background: var(--paper);
+      transition: background 0.3s, border-color 0.3s;
     }
 
     .sidebar-section-title {
@@ -220,7 +277,7 @@
       background: var(--cream);
     }
 
-    .upload-zone:hover { border-color: var(--ink); background: #ede8dd; }
+    .upload-zone:hover { border-color: var(--ink); }
     .upload-zone.has-image { border-style: solid; border-color: var(--ink); }
 
     .upload-zone input[type="file"] {
@@ -230,7 +287,6 @@
     }
 
     .upload-icon { font-size: 28px; margin-bottom: 10px; color: var(--muted); }
-
     .upload-zone p { font-size: 12px; color: var(--muted); line-height: 1.5; }
 
     .upload-zone .upload-hint {
@@ -319,6 +375,7 @@
       justify-content: flex-start;
       background: var(--cream);
       position: relative;
+      transition: background 0.3s;
     }
 
     .canvas-area::before {
@@ -370,16 +427,49 @@
 
     .empty-state p { font-size: 13px; font-weight: 300; }
 
+    /* ── MOBILE RESPONSIVE ─────────────────────── */
     @media (max-width: 768px) {
-      .app-body { grid-template-columns: 1fr; }
-      .sidebar { border-right: none; border-bottom: 1px solid var(--rule); }
-      .canvas-area { padding: 24px; }
-      .app-header { padding: 16px 20px; }
+      .login-wrap { padding: 32px 24px; max-width: 100%; }
+      .login-masthead { margin-bottom: 36px; }
+      .login-masthead h1 { font-size: 42px; }
+      .login-masthead .tagline { font-size: 12px; }
+      .login-btn { margin-top: 28px; padding: 18px 24px; font-size: 13px; }
+
+      .app-header { padding: 14px 16px; }
+      .app-header .brand { font-size: 19px; }
+      .logout-btn { padding: 7px 12px; font-size: 9px; }
+
+      .app-body { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+      .sidebar { border-right: none; border-bottom: 1px solid var(--rule); padding: 20px 16px; gap: 20px; }
+      .sidebar-section-title { font-size: 8px; margin-bottom: 12px; }
+
+      .upload-zone { padding: 20px 16px; }
+      .upload-icon { font-size: 22px; margin-bottom: 6px; }
+
+      .control-block { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+      .control-val { font-size: 17px; }
+      input[type="range"]::-webkit-slider-thumb { width: 18px; height: 18px; }
+
+      .dl-btn { padding: 18px; font-size: 12px; letter-spacing: 0.15em; border-radius: 4px; position: sticky; bottom: 0; z-index: 10; }
+
+      .canvas-area { padding: 16px; min-height: 50vh; }
+      .canvas-area::before { background-size: 18px 18px; }
+      .canvas-wrap { max-width: 100%; }
+      .canvas-label { font-size: 8px; margin-bottom: 8px; }
+      canvas { box-shadow: 0 4px 20px rgba(14,14,14,0.1); }
+      .empty-state { height: 240px; }
+    }
+
+    @media (max-width: 380px) {
+      .login-masthead h1 { font-size: 36px; }
+      .control-block { grid-template-columns: 1fr; }
+      .app-header { padding: 12px 14px; }
     }
   </style>
 </head>
 <body>
 
+<!-- LOGIN -->
 <div id="login-section">
   <div class="login-wrap">
     <div class="login-masthead">
@@ -400,14 +490,35 @@
     </div>
     <button class="login-btn" onclick="checkLogin()">Enter Studio →</button>
     <p id="error" class="error-msg">✕ &nbsp;Invalid credentials. Please try again.</p>
+
+    <div style="margin-top: 28px; display: flex; justify-content: center;">
+      <div class="theme-toggle" onclick="toggleTheme()">
+        <span class="theme-toggle-icon">☀️</span>
+        <div class="theme-toggle-track">
+          <div class="theme-toggle-thumb"></div>
+        </div>
+        <span class="theme-toggle-icon">🌙</span>
+      </div>
+    </div>
   </div>
 </div>
 
+<!-- APP -->
 <div id="app-section">
   <header class="app-header">
     <div class="brand">Dot<span>Press</span></div>
-    <button class="logout-btn" onclick="logout()">Sign Out</button>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <div class="theme-toggle" onclick="toggleTheme()">
+        <span class="theme-toggle-icon">☀️</span>
+        <div class="theme-toggle-track">
+          <div class="theme-toggle-thumb"></div>
+        </div>
+        <span class="theme-toggle-icon">🌙</span>
+      </div>
+      <button class="logout-btn" onclick="logout()">Sign Out</button>
+    </div>
   </header>
+
   <div class="app-body">
     <aside class="sidebar">
       <div>
@@ -445,6 +556,7 @@
         Download Print File
       </button>
     </aside>
+
     <main class="canvas-area">
       <div class="canvas-wrap">
         <p class="canvas-label">Preview — 576px print width</p>
@@ -467,6 +579,18 @@
 <script>
   const VALID_USER = "admin";
   const VALID_PASS = "1234";
+
+  // Theme
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    localStorage.setItem('dotpress-theme', isDark ? 'light' : 'dark');
+  }
+
+  // Restore saved theme
+  const savedTheme = localStorage.getItem('dotpress-theme');
+  if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
 
   function checkLogin() {
     const u = document.getElementById('username').value;
